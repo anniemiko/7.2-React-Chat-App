@@ -3,70 +3,61 @@ var ReactDOM = require('react-dom');
 var Backbone = require('backbone');
 
 var models = require('../models/chat-models.js');
+var LoginForm = require('./login.jsx').LoginForm;
+
+var messageCollection = new models.MessageCollection();
 
 var ChatContainer = React.createClass({
+  componentWillMount: function(){
+     window.setInterval(this.getMessages, 3000);
+  },
   getInitialState: function(){
-    var messageCollection = new models.MessageCollection();
+    // var messageCollection = new models.MessageCollection();
     var self = this;
     messageCollection.fetch().done(function(){
-      self.setState({messageList: messageCollection});
+      self.setState({messageCollection: messageCollection});
       self.forceUpdate();
     });
     return {
-      messageList: messageCollection
+      messageList: messageCollection,
+      username: this.props.router.username
     }
   },
-  addMessage: function(message){
+  getMessages: function(){
+    var self = this;
+      messageCollection.fetch().done(function(){
+        self.setState({messageCollection: messageCollection});
+      });
+  },
+  addPost: function(message){
     var messageList = this.state.messageList;
+    message.username = this.state.username;
     messageList.create(message);
     this.setState({messageList: messageList});
   },
   render: function(){
     return (
       <div className="container">
-        <div className="col-md-6 col-md-push-3">
-          <h1>Super Cool Chat App</h1>
-          <UsernameForm addUser={this.addUser} />
-          <MessageForm addMessage={this.addMessage} />
+        <div className="col-md-10 col-md-push-1">
+          <h1>TIY Too Cool for School Chat App</h1>
+          <div className="col-md-3 addChat">
+          <MessageForm addMessage={this.addPost} />
+          </div>
+          <div className="col-md-7 chatList">
           <MessageList messagePost={this.state.messageList} />
+          </div>
         </div>
       </div>
     )
   }
 })
 
-var UsernameForm = React.createClass({
-  getInitialState: function(){
-    var name = {username: ''};
-    return name;
-  },
-  addUser: function(event){
-    event.preventDefault();
-    this.props.addUser(this.state);
-    this.setState({username: ''});
-  },
-  handleUsernameChange: function(){
-    this.setState({username: event.target.value})
-  },
-  render: function(){
-    return (
-      <form onSubmit={this.addUser}>
-        <div className="form-group">
-          <label htmlFor="userName">Username</label>
-          <input type="text" value={this.state.username} onChange={this.handleUsernameChange} className="form-control" id="userName" placeholder="username"/>
-        </div>
-        <input type="submit" className="btn btn-success" value="Add User"/>
-      </form>
-    )
-  }
-});
-
 var MessageForm = React.createClass({
   getInitialState: function(){
     var chat = {message: ''};
     return chat;
   },
-  handleMessageChange: function(){
+  handleMessageChange: function(event){
     this.setState({message: event.target.value})
   },
   addMessage: function(event){
@@ -75,11 +66,10 @@ var MessageForm = React.createClass({
     this.setState({message: ''});
   },
   render: function(){
-    console.log(this.state.message);
     return (
       <form onSubmit={this.addMessage}>
         <div className="form-group">
-          <label htmlFor="message">Message</label>
+          <label htmlFor="message">Join the convo:</label>
           <input value={this.state.message} onChange={this.handleMessageChange} type="text" className="form-control" id="message" placeholder="message"/>
         </div>
         <input type="submit" className="btn btn-primary" value="Post Message"/>
@@ -99,8 +89,8 @@ var MessageList = React.createClass({
       )
     });
     return (
-      <div>
-        <h2>Messages</h2>
+      <div class="chat-messages">
+        <h2>Chatty Chat</h2>
         <ul className="messageList">
           {posts}
         </ul>
