@@ -83,8 +83,8 @@ var MessageList = React.createClass({
     var posts = this.props.messagePost.map(function(post){
       return (
         <li key={post.cid}>
-          <p>{post.get('username')} says {post.get('message')}</p>
-          <span>{post.get('timestamp')}</span>
+          <span className="name">{post.get('username')}</span><span> says</span> <p>{post.get('message')}</p>
+          <span className="time">{post.get('timestamp')}</span>
         </li>
       )
     });
